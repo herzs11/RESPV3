@@ -22,30 +22,30 @@ int flowTimer;
 int count;
 
 typedef struct {
-    float period,
-    float Tin,
-    float Tex,
-    float Thold,
-    float flowDesired,
+    float period;
+    float Tin;
+    float Tex;
+    float Thold;
+    float flowDesired;
     bool inhale
 } vars;
 vars VARS;
 
 typedef struct {
-    float pressure,
-    float diff,
-    float flowRate,
-    float totalVol,
+    float pressure;
+    float diff;
+    float flowRate;
+    float totalVol;
     float PEEP
 } readings;
 
 readings READINGS;
 
 typedef struct {
-    float tidalPeak,
-    float respRate,
-    float IEratio,
-    float triggerSensitivity,
+    float tidalPeak;
+    float respRate;
+    float IEratio;
+    float triggerSensitivity;
 } settings;
 
 settings SETTINGS;
@@ -161,15 +161,43 @@ void loop() {
     count++;
 }
 
-void homeMotor(){ // TODO: FIND REAL HOME FUNCTION
-    while (.1>getDiff()>-.1) {
-        digitalWrite(pins.pulse, HIGH);
-        delay(10);
-        digitalWrite(pins.pulse, LOW);
-        delay(10);
+void homeMotor() {
+    Serial.println("Homing");
+    stepper.setCurrentPosition(0);
+    float lowest = getDiff();
+    float highest = getDiff();
+    int pos = stepper.currentPosition();
+    stepper.moveTo(pos+1600);
+    while (stepper.distanceToGo()!=0) {
+        Serial.println(1);
+        stepper.run();
+        READINGS.diff = getDiff();
+        if (READINGS.diff<lowest){
+            lowest = READINGS.diff;
+        }
+        if (READINGS.diff>highest){
+            highest = READINGS.diff;
+        }
+        delay(1);
+    }
+    Serial.print(highest);
+    Serial.print(lowest);
+    delay(1000);
+    stepper.moveTo(pos+3200);
+    READINGS.diff = getDiff();
+    while (READINGS.diff < highest-.01){
+        Serial.println(2);
+        stepper.run();
+        READINGS.diff = getDiff();
+        delay(1);
+    }
+    while (READINGS.diff > lowest*3) {
+        Serial.println(3);
+        stepper.run();
+        READINGS.diff = getDiff();
+        delay(1);
     }
     stepper.setCurrentPosition(0);
-
 }
 
 float getDiff() {
@@ -190,7 +218,7 @@ void getFlow() {
     }
     READINGS.totalVol += (VARS.flowDesired*30);
     if (abs(READINGS.totalVol-SETTINGS.tidalPeak)<10){
-        inhale();
+        exhale();
     }
 }
 
@@ -249,7 +277,7 @@ void checkPot(){
     }
 }
 
-void inhale() {
+void exhale() {
     count = 0;
     READINGS.PEEP = getPressure();
     int startHold = millis();
