@@ -29,8 +29,8 @@ typedef struct {
     float Thold;
     float flowDesired;
     bool inhale;
-} vars;
-vars VARS;
+} VARS;
+VARS *vars, v;
 
 typedef struct {
     float pressure;
@@ -38,18 +38,19 @@ typedef struct {
     float flowRate;
     float totalVol;
     float PEEP;
-} readings;
+} READINGS;
 
-readings READINGS;
+READINGS *readings, r;
 
 typedef struct {
     float tidalPeak;
     float respRate;
     float IEratio;
     float triggerSensitivity;
-} settings;
+} SETTINGS;
 
-settings SETTINGS;
+SETTINGS *settings, s;
+
 void homeMotor();
 float getPressure();
 void alert();
@@ -58,6 +59,10 @@ float getDiff();
 void getFlow();
 
 void setup() {
+    vars = &v;
+    settings = &s;
+    readings = &r;
+    
     pinMode(buttonA, INPUT_PULLUP);
     pinMode(buttonB, INPUT_PULLUP);
     pinMode(diff, INPUT);
@@ -91,20 +96,20 @@ void setup() {
         Serial.print("HERE3");
         lcd.setCursor(13, 0);
         TIDALPEAK.update();
-        SETTINGS.tidalPeak = map(TIDALPEAK.getValue(), 0, 1023, 200, 800); //cc
-        lcd.print(SETTINGS.tidalPeak);
+        settings->tidalPeak = map(TIDALPEAK.getValue(), 0, 1023, 200, 800); //cc
+        lcd.print(settings->tidalPeak);
         lcd.setCursor(13, 1);
         RESPRATE.update();
-        SETTINGS.respRate = map(RESPRATE.getValue(), 0, 1023, 8, 40); //bpm
-        lcd.print(SETTINGS.respRate);
+        settings->respRate = map(RESPRATE.getValue(), 0, 1023, 8, 40); //bpm
+        lcd.print(settings->respRate);
         lcd.setCursor(14, 2);
         IERATIO.update();
-        SETTINGS.IEratio = map(IERATIO.getValue(), 0, 1023, 1, 4);
-        lcd.print(SETTINGS.IEratio);
+        settings->IEratio = map(IERATIO.getValue(), 0, 1023, 1, 4);
+        lcd.print(settings->IEratio);
         lcd.setCursor(11, 3);
         TRIGGER.update();
-        SETTINGS.triggerSensitivity = map(TRIGGER.getValue(), 0, 1023, -1, -5); //?? cc
-        lcd.print(SETTINGS.triggerSensitivity);
+        settings->triggerSensitivity = map(TRIGGER.getValue(), 0, 1023, -1, -5); //?? cc
+        lcd.print(settings->triggerSensitivity);
         delay(5);
     }
     lcd.clear();
@@ -127,9 +132,9 @@ void loop() {
             stepper.run();
             lcd.clear();
             lcd.setCursor(0,0);
-            lcd.print(READINGS.flowRate);
+            lcd.print(readings->flowRate);
             lcd.setCursor(0,1);
-            lcd.print(READINGS.totalVol);
+            lcd.print(readings->totalVol);
         }
         else {
             stepper.run();
@@ -145,20 +150,20 @@ void loop() {
             lcd.clear();
             lcd.setCursor(13, 0);
             TIDALPEAK.update();
-            SETTINGS.tidalPeak = map(TIDALPEAK.getValue(), 0, 1023, 200, 800); //cc
-            lcd.print(SETTINGS.tidalPeak);
+            settings->tidalPeak = map(TIDALPEAK.getValue(), 0, 1023, 200, 800); //cc
+            lcd.print(settings->tidalPeak);
             lcd.setCursor(13, 1);
             RESPRATE.update();
-            SETTINGS.respRate = map(RESPRATE.getValue(), 0, 1023, 8, 40); //bpm
-            lcd.print(SETTINGS.respRate);
+            settings->respRate = map(RESPRATE.getValue(), 0, 1023, 8, 40); //bpm
+            lcd.print(settings->respRate);
             lcd.setCursor(14, 2);
             IERATIO.update();
-            SETTINGS.IEratio = map(IERATIO.getValue(), 0, 1023, 1, 4);
-            lcd.print(SETTINGS.IEratio);
+            settings->IEratio = map(IERATIO.getValue(), 0, 1023, 1, 4);
+            lcd.print(settings->IEratio);
             lcd.setCursor(11, 3);
             TRIGGER.update();
-            SETTINGS.triggerSensitivity = map(TRIGGER.getValue(), 0, 1023, -1, -5); //?? cc
-            lcd.print(SETTINGS.triggerSensitivity);
+            settings->triggerSensitivity = map(TRIGGER.getValue(), 0, 1023, -1, -5); //?? cc
+            lcd.print(settings->triggerSensitivity);
         }
     }
     stepper.run();
@@ -179,12 +184,12 @@ void homeMotor() {
     while (stepper.distanceToGo()!=0) {
         Serial.println(1);
         stepper.run();
-        READINGS.diff = getDiff();
-        if (READINGS.diff<lowest){
-            lowest = READINGS.diff;
+        readings->diff = getDiff();
+        if (readings->diff<lowest){
+            lowest = readings->diff;
         }
-        if (READINGS.diff>highest){
-            highest = READINGS.diff;
+        if (readings->diff>highest){
+            highest = readings->diff;
         }
         delay(1);
     }
@@ -192,17 +197,17 @@ void homeMotor() {
     Serial.print(lowest);
     delay(1000);
     stepper.moveTo(pos+3200);
-    READINGS.diff = getDiff();
-    while (READINGS.diff < highest-.01){
+    readings->diff = getDiff();
+    while (readings->diff < highest-.01){
         Serial.println(2);
         stepper.run();
-        READINGS.diff = getDiff();
+        readings->diff = getDiff();
         delay(1);
     }
-    while (READINGS.diff > lowest*3) {
+    while (readings->diff > lowest*3) {
         Serial.println(3);
         stepper.run();
-        READINGS.diff = getDiff();
+        readings->diff = getDiff();
         delay(1);
     }
     stepper.setCurrentPosition(0);
@@ -214,19 +219,19 @@ float getDiff() {
 }
 
 void getFlow() {
-    READINGS.pressure = getPressure();
-    if (READINGS.pressure >= MAXPRESSURE) {
+    readings->pressure = getPressure();
+    if (readings->pressure >= MAXPRESSURE) {
         alert();
     }
-    READINGS.flowRate = getDiff();
-    if (READINGS.flowRate > VARS.flowDesired) {
+    readings->flowRate = getDiff();
+    if (readings->flowRate > vars->flowDesired) {
         stepper.moveTo(stepper.currentPosition()-50); // TODO: Empirical equation?
     }
-    else if (READINGS.flowRate < VARS.flowDesired) {
+    else if (readings->flowRate < vars->flowDesired) {
         stepper.moveTo(stepper.currentPosition()+50);
     }
-    READINGS.totalVol += (VARS.flowDesired*30);
-    if (abs(READINGS.totalVol-SETTINGS.tidalPeak)<10){
+    readings->totalVol += (vars->flowDesired*30);
+    if (abs(readings->totalVol-settings->tidalPeak)<10){
         exhale();
     }
 }
@@ -245,53 +250,54 @@ void alert(){
 }
 
 void recalcVars(){
-    VARS.period = 60000/SETTINGS.respRate;
-    VARS.Tin = VARS.period/(SETTINGS.IEratio+1)*.8;
-    VARS.Thold = VARS.period/(SETTINGS.IEratio+1)*.2;
-    VARS.Tex = VARS.period-VARS.Tin-VARS.Thold;
-    VARS.flowDesired = SETTINGS.tidalPeak/VARS.Tin;
+    vars->period = 60000/settings->respRate;
+    vars->Tin = vars->period/(settings->IEratio+1)*.8;
+    vars->Thold = vars->period/(settings->IEratio+1)*.2;
+    vars->Tex = vars->period-vars->Tin-vars->Thold;
+    vars->flowDesired = settings->tidalPeak/vars->Tin;
 }
 
 void checkPot(){
-    static int pot = 1;
-    switch(pot) {
-        case 1:
+    typedef enum {tidalpeak,resprate,ieratio,trigger} pot;
+    static pot p = tidalpeak;
+    switch(p) {
+        case tidalpeak:
             TIDALPEAK.update();
-            if (abs(SETTINGS.tidalPeak - map(TIDALPEAK.getValue(), 0, 1023, 200, 800)) > 20){
+            if (abs(settings->tidalPeak - map(TIDALPEAK.getValue(), 0, 1023, 200, 800)) > 20){
                 potChanged=true;
             }
-            pot = 2;
+            p = resprate;
             break;
-        case 2:
+        case resprate:
             RESPRATE.update();
-            if (abs(SETTINGS.respRate - map(RESPRATE.getValue(), 0, 1023, 8, 40)) > 1){
+            if (abs(settings->respRate - map(RESPRATE.getValue(), 0, 1023, 8, 40)) > 1){
                 potChanged=true;
             }
-            pot = 3;
+            p = ieratio;
             break;
-        case 3:
+        case ieratio:
             IERATIO.update();
-            if (abs(SETTINGS.IEratio - map(IERATIO.getValue(), 0, 1023, 1, 4)) > 0) {
+            if (abs(settings->IEratio - map(IERATIO.getValue(), 0, 1023, 1, 4)) > 0) {
                 potChanged=true;
             }
-            pot = 4;
+            p = trigger;
             break;
-        case 4:
+        case trigger:
             TRIGGER.update();
-            if (abs(SETTINGS.triggerSensitivity - map(TRIGGER.getValue(), 0, 1023, -1, -5)) > 0) {
+            if (abs(settings->triggerSensitivity - map(TRIGGER.getValue(), 0, 1023, -1, -5)) > 0) {
                 potChanged=true;
             }
-            pot = 1;
+            p = tidalpeak;
             break;
     }
 }
 
 void exhale() {
     count = 0;
-    READINGS.PEEP = getPressure();
+    readings->PEEP = getPressure();
     //int startHold = millis();
-    /*while (millis()-startHold < VARS.Thold){
-        if (getPressure() > READINGS.PEEP){
+    /*while (millis()-startHold < vars->Thold){
+        if (getPressure() > readings->PEEP){
             stepper.moveTo(stepper.currentPosition()-10);
         }
         else {
@@ -299,14 +305,14 @@ void exhale() {
         }
         stepper.run();
     }*/
-    delay(VARS.Thold); //TODO: CHOOSE THIS OR ABOVE^??
+    delay(vars->Thold); //TODO: CHOOSE THIS OR ABOVE^??
     int startExhale = millis();
     t.stop(flowTimer);
     stepper.runToNewPosition(0);
-    while (millis()-startExhale<VARS.Tex){
+    while (millis()-startExhale<vars->Tex){
         // HOLD
     }
-    READINGS.totalVol = 0;
+    readings->totalVol = 0;
     flowTimer = t.every(FLOW_MEASURE_INTERVAL, getFlow, -1);
     lcd.clear();
 

@@ -1,0 +1,27 @@
+startup
+
+set valve home
+start menu
+
+
+
+
+pinout
+A97 - Pot 1
+A96 - Pot 2
+A95 - Pot 3
+A94 - Pot 4
+
+D23 - step
+D25 - direction
+D26 - button 1
+D27 - button 2
+D29 - button 3
+D31 - button 5
+
+D21 - SCL - display
+D20 - SDA - display
+
+sensors
+diff sdp816-125pa
+single 24pcefa6g
