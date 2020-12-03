@@ -1,0 +1,60 @@
+volume contolled breathing loop
+
+variables
+pressure = air pressure, -2 to 40 cmH2O
+oroficeDrop = delta pressure across orofice 
+flowPerPa = an imperically determined flow rate per Pascal of oroficeDrop maybe a constant and may be a different value for different pressure ranges
+stepTime = time of last step pulse
+BPM = breaths per minute
+breathStart = time in millis of begining of inspiration
+IoverE = ratio of inhale time to exhale time
+Itime = (1/BPM)*(1-IoverE) (this formula is not right)
+tidal = total tidal volume desired
+currentTidal = tidal volume since start of inspiration
+Pmax = maximum pressure allowable
+PEEP = measured back pressure provided by PEEP valve 
+accel = current desired signed accelleration
+flowDesired = ideal flow rate for duration of inspiration
+flowError = what is the difference between current and desired flow rate (cc/sec).
+errorDir = are we too fast or too slow
+Perror = delta between desired pressure and actual pressure
+
+Motor variables
+dir = current motor direction
+currentStepInterval = time interval between last step and step before that
+currentVelocity = 1/ currentStepInterval * dir
+stepTime = time of last step pulse
+
+
+Constants
+pulseLength = minimum time in micros that the step pin has to be held high to trigger the motor driver to step once.
+directionLag = minimum time from changing the value of the direction variable until delivering the next pulse
+pulseMin = minimum time in seconds between step pulses at max velocity (1/max velocity in pulses per second) 
+accel = the maximum safe accelleration possible without losing steps
+
+
+flow controlled breathing loop
+
+setup:
+determine Itime
+determine flowDesired
+set breathStart = millis
+open valve to pre-determine
+
+loop:
+loop until (tidal volume reached, max inspiration pressure reached, time of 120% Itime is reached)
+	read current pressure
+	read current oroficeDrop
+	calculate current flow rate
+	calculate current flowError
+	use flowError to calculate desired velocity and direction (greater error means greater desired velocity)
+	currentVelocity = currentVelocity+accel*currentStepInterval*errorDir
+	check new currentVelocity to see if it has changed sign
+		update dir if velocity has changed
+	calculate time of next step pulse
+	calculate volume for current time interval
+	update currentTidal
+	check to see if it is time for another step
+	
+	
+
