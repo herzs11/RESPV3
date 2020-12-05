@@ -1,4 +1,6 @@
-ArduinoMEGA based, electric blower, low cost ventilator
+<h1><u>ArduinoMEGA based, electric blower, low cost ventilator</u></h1>
+
+<h3>Description</h3>
 In short, there are 4 inputs for 4 different variables concerning a patients breathing ability, as recommended by the MIT open source ventilator 
 project. The code mostly consists of reading sensor inputs, calculating volume of air flow, and operating a stepper motor to open and close a valve. 
 The machine has two basic operating modes:
@@ -6,6 +8,7 @@ The machine has two basic operating modes:
 breathing rate.
 2. Assisted/Patient initiated: The inhalation is triggered by a negative pressure from the patient attempting to inhale.
 
+<h3>Code</h3>
 Motor homing:
 	The stepper motor is homed by making a full revolution of the valve, and finding the maximum and minimum pressure readings. It then moves 
 again until it reaches the highest reading position, and moves the other direction until it reads the lowest, and sets that as home. 
