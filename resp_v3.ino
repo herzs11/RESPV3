@@ -24,6 +24,7 @@ int count;
 
 typedef struct {
     float period;
+    float startTime;
     float Tin;
     float Tex;
     float Thold;
@@ -117,14 +118,12 @@ void setup() {
     recalcVars();
     stepper.setMaxSpeed(5000);
     stepper.setAcceleration(5000);
-    Serial.print("\nHERE\n");
-    //homeMotor();
+    homeMotor();
     flowTimer = t.every(FLOW_MEASURE_INTERVAL, getFlow, -1);
-
+    vars->startTime = millis();
 }
 
 void loop() {
-    Serial.print("ASDFASDF");
     t.update();
     stepper.run();
     if (count%5==0) {
@@ -231,7 +230,7 @@ void getFlow() {
         stepper.moveTo(stepper.currentPosition()+50);
     }
     readings->totalVol += (vars->flowDesired*30);
-    if (abs(readings->totalVol-settings->tidalPeak)<10){
+    if (abs(readings->totalVol-settings->tidalPeak)<10 || millis()-vars->startTime > vars->Tin*1.1){ // TODO: 
         exhale();
     }
 }
@@ -315,5 +314,6 @@ void exhale() {
     readings->totalVol = 0;
     flowTimer = t.every(FLOW_MEASURE_INTERVAL, getFlow, -1);
     lcd.clear();
+    vars->startTime = millis();
 
 }
