@@ -7,12 +7,14 @@ The machine has two basic operating modes:
 1. Volume based: In the case of a comatose patient, the breathing cycle is determined only by the volume of the patient lungs, and a consistent 
 breathing rate.
 2. Assisted/Patient initiated: The inhalation is triggered by a negative pressure from the patient attempting to inhale.
-
+</br>
+</br>
 <h3>Code</h3>
 <b>Motor homing</b>
 	The stepper motor is homed by making a full revolution of the valve, and finding the maximum and minimum pressure readings. It then moves 
 again until it reaches the highest reading position, and moves the other direction until it reads the lowest, and sets that as home. 
-
+</br>
+</br>
 <b>Main Loop</b>
 	The main loop is responsible for calling the getFlow subroutine every 30 milliseconds, which calculates the current flow rate, adjusts the 
 valve to maintain the optimum flow rate, and calculates the total volume passed to the patient in that inhale. In volume control mode, It also 
@@ -21,12 +23,14 @@ is only triggered by the time calculated by the optimal breathes per minute. The
 adjust all the settings and variables if they are changed without blocking the code, using a state changing switch statement. 
 	The exhale loop in volume mode closes the valve, and allows for exhale only in the calculated time of the exhale. In assisted mode, it 
 closes the valve as well, but doesn't open it until the patient attempts to inhale, or a failsafe time elapses.
-
+</br>
+</br>
 <b>Settings (per MIT recommendations)</b></br>
 	Tidal Peak: Total volume of lungs 200-800 mL</br>
 	Respiratory Rate: Breaths per minute 6-40</br>
 	I/E Ratio: Inhale to exhale ratio 1:1 - 1:4</br>
 	Trigger Sensitivity: Dip in pressure that triggers an inhale</br>
+	</br>
 <b>Variables (recalculated each time settings are changed)</b></br>
 	Period: Total time of one breath (millis): 60000/respRate</br>
 	Tin: Time of inhale: (period/IEratio+1)x.8     <i>(80% is the breath, 20% is the holding time at the top of the inhale)</i></br>
