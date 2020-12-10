@@ -37,4 +37,7 @@ closes the valve as well, but doesn't open it until the patient attempts to inha
 	Thold: Holding time at the peak of inspiration: (period/IEratio+1)x.2</br>
 	Tex: Time of exhale: period-Tin-Thold</br>
 	flowDesired: Optimal flow rate: tidalPeak/Tin</br>
+	
+<h3>Demo</h3>
+<p>https://youtu.be/gfGuD7pToNI</p>
 
