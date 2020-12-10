@@ -29,7 +29,7 @@ closes the valve as well, but doesn't open it until the patient attempts to inha
 	Tidal Peak: Total volume of lungs 200-800 mL</br>
 	Respiratory Rate: Breaths per minute 6-40</br>
 	I/E Ratio: Inhale to exhale ratio 1:1 - 1:4</br>
-	Trigger Sensitivity: Dip in pressure that triggers an inhale</br>
+	Trigger Sensitivity: Dip in pressure that triggers an inhale (TODO!)</br>
 	</br>
 <b>Variables (recalculated each time settings are changed)</b></br>
 	Period: Total time of one breath (millis): 60000/respRate</br>
